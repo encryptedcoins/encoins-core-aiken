@@ -1,22 +1,17 @@
-///////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////
-///////////////////// ENCOINS Minting Policy //////////////////////
-///////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////
-//////////////////// ENCOINS Ledger Validator /////////////////////
-///////////////////////////////////////////////////////////////////
-
-use aiken/builtin.{mk_nil_data, verify_ed25519_signature}
+use aiken/builtin.{serialise_data, verify_ed25519_signature}
 use aiken/bytearray
 use aiken/dict.{from_list, has_key}
+use aiken/hash.{sha2_256}
 use aiken/int
-use aiken/list.{all, any, filter, foldr, head, length, map, sort, tail}
+use aiken/list.{
+  all, any, difference, filter, foldr, head, length, map, sort, tail,
+}
 use aiken/option.{or_else}
 use aiken/transaction.{InlineDatum, Mint, ScriptContext}
 use aiken/transaction/credential.{Address}
 use aiken/transaction/value.{
-  PolicyId, Value, add, flatten, from_lovelace, lovelace_of, negate, tokens,
-  zero,
+  PolicyId, Value, add, flatten, from_lovelace, lovelace_of, negate, policies,
+  tokens, without_lovelace, zero,
 }
 use encoins_core_aiken/minting_polarity.{
   MintingPolarity, inputToEncoinsWithPolarity,
@@ -44,9 +39,9 @@ type ProofSignature =
 type EncoinsRedeemerOnChain =
   (TxParams, EncoinsInput, ProofHash, ProofSignature)
 
-// TODO: implement this
+// NOTE: this is different from the Haskell version
 fn hashRedeemer(red: EncoinsRedeemerOnChain) -> ByteArray {
-  #""
+  sha2_256(serialise_data(red))
 }
 
 validator(par: EncoinsPolicyParams) {
@@ -72,11 +67,12 @@ validator(par: EncoinsPolicyParams) {
     // Condition 0
     let actual =
       tokens(vMint, encoinsSymb)
-    // TODO: fix repeating token names handling
+    // NOTE: this is different from the Haskell version,
+    // where duplicates in `inputs` will cause the transaction to fail
     let expected =
       from_list(map(inputs, inputToEncoinsWithPolarity), bytearray.compare)
     let cond0 =
-      actual == expected
+      actual == expected && policies(vMint) == [encoinsSymb]
 
     // Condition 1
     let cond1 =
@@ -114,13 +110,10 @@ validator(par: EncoinsPolicyParams) {
     let vOut =
       foldr(vOuts, add, zero())
 
-    // TODO: Check that it is the same thing as in Haskell
     let ledgerProducedOuts =
       filter(
         info.outputs,
-        fn(x) {
-          x.address == ledgerAddr && x.datum == InlineDatum(mk_nil_data())
-        },
+        fn(x) { x.address == ledgerAddr && x.datum == InlineDatum(Void) },
       )
     let vIns =
       map(ledgerProducedOuts, fn(x) { x.value })
@@ -152,9 +145,12 @@ validator(par: EncoinsPolicyParams) {
     let cond7 =
       all(adaVals, fn(x) { x == minAdaTxOutInLedger })
 
-    // TODO: Add condition that vIns only contains ada and encoins
+    // Condition 8
+    let cond8 =
+      difference(policies(without_lovelace(vIn)), [encoinsSymb]) == []
+
     // Imposing validation conditions
-    cond0 && cond1 && cond2 && cond3 && ( cond4 || cond5 ) && cond6 && cond7
+    cond0 && cond1 && cond2 && cond3 && ( cond4 || cond5 ) && cond6 && cond7 && cond8
   }
 }
 

@@ -20,7 +20,10 @@ pub fn polarityToInteger2(p: MintingPolarity) -> Int {
   }
 }
 
-pub fn inputToEncoinsWithPolarity(a: (ByteArray, MintingPolarity)) -> (ByteArray, Int) {
-  let (bs, p) = a
+pub fn inputToEncoinsWithPolarity(
+  a: (ByteArray, MintingPolarity),
+) -> (ByteArray, Int) {
+  let (bs, p) =
+    a
   (bs, polarityToInteger(p))
 }
