@@ -1,4 +1,7 @@
-use aiken/builtin.{cons_bytearray}
+use aiken/builtin.{append_bytearray, cons_bytearray}
+use aiken/transaction/credential.{
+  Address, Inline, ScriptCredential, VerificationKeyCredential,
+}
 
 // use aiken/transaction/credential.{Address, payment_credential}
 
@@ -16,24 +19,26 @@ pub fn integerToBytes(n: Int) -> ByteArray {
     },
   )
 }
-// pub fn addressToBytes(a: Address) -> ByteArray {
-//   let paymentPart =
-//     when payment_credential(a) is {
-//       VerificationKeyCredential(cred) ->
-//         cred
-//       ScriptCredential(cred) ->
-//         cred
-//     }
-//   let stakingPart =
-//     when staking_credential(a) is {
-//       Some(Inline(s)) ->
-//         when s is {
-//           VerificationKeyCredential(cred) ->
-//             cred
-//           ScriptCredential(cred) ->
-//             cred
-//         }
-//       _ ->
-//         #""
-//     }
-// }
+
+pub fn addressToBytes(a: Address) -> ByteArray {
+  let paymentPart =
+    when a.payment_credential is {
+      VerificationKeyCredential(cred) ->
+        cred
+      ScriptCredential(cred) ->
+        cred
+    }
+  let stakingPart =
+    when a.stake_credential is {
+      Some(Inline(s)) ->
+        when s is {
+          VerificationKeyCredential(cred) ->
+            cred
+          ScriptCredential(cred) ->
+            cred
+        }
+      _ ->
+        #""
+    }
+  append_bytearray(paymentPart, stakingPart)
+}

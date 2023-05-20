@@ -44,12 +44,12 @@
         {
           "title": "encoinsSymb",
           "schema": {
-            "$ref": "#/definitions/ByteArray"
+            "$ref": "#/definitions/encoins~1EncoinsLedgerValidatorParams"
           }
         }
       ],
-      "compiledCode": "58ba0100003232323232323232323232232222533300a32323233323222330030020013001001222533301300214a0264646464a66602866ebc0140045288999803803801802980a001980a001180b801980a80100100099ba548000cc040dd480325eb80dd5998039804800a40246600c601000290000a4c2c6eb8004cc0040052000222233330073370e0020060184666600a00a66e000112002300e001002002230053754002460066ea80055cd2ab9d5573caae7d5d02ba15745",
-      "hash": "1d6d94ad178ddd9c48f4b2576ae2451e4f61f8db2239a53a11765754"
+      "compiledCode": "58bb01000032323232323232323232322222533300932323233323222330030020013001001222533301200214a0264646464a66602666ebc014004528899980380380180298098019809801180b001980a00100100099ba548000cc03ccc01cc02401920004bd701bab33006300800148048cc014c01c0052000149858cc0040052000222233330073370e0020060184666600a00a66e000112002300e001002002230053754002460066ea80055cd2ab9d5573caae7d5d02ba157441",
+      "hash": "d5344f61f74b22282ade7a8800286ce0968b16ce2344548052960d43"
     }
   ],
   "definitions": {
@@ -259,6 +259,22 @@
       "values": {
         "$ref": "#/definitions/aiken~1dict~1Dict$ByteArray_Int"
       }
+    },
+    "encoins/EncoinsLedgerValidatorParams": {
+      "title": "EncoinsLedgerValidatorParams",
+      "anyOf": [
+        {
+          "title": "EncoinsLedgerValidatorParams",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": [
+            {
+              "title": "policyId",
+              "$ref": "#/definitions/ByteArray"
+            }
+          ]
+        }
+      ]
     },
     "encoins_core_aiken/minting_polarity/MintingPolarity": {
       "title": "MintingPolarity",

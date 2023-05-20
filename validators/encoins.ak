@@ -41,6 +41,17 @@ type EncoinsRedeemerOnChain =
 
 // NOTE: this is different from the Haskell version
 fn hashRedeemer(red: EncoinsRedeemerOnChain) -> ByteArray {
+  // let ((ledgerAddr, changeAddr), (v, inputs), proofHash, _) =
+  //   red
+  // sha2_256(
+  //   append_bytearray(
+  //     addressToBytes(ledgerAddr),
+  //     append_bytearray(
+  //       addressToBytes(changeAddr),
+  //       append_bytearray(integerToBytes(v), append_bytearray(inputs, proofHash)),
+  //     ),
+  //   ),
+  // )
   sha2_256(serialise_data(red))
 }
 
@@ -154,7 +165,11 @@ validator(par: EncoinsPolicyParams) {
   }
 }
 
-validator(encoinsSymb: PolicyId) {
+type EncoinsLedgerValidatorParams {
+  policyId: PolicyId,
+}
+
+validator(encoinsSymb: EncoinsLedgerValidatorParams) {
   fn ledgerValidatorCheck(
     _datum: Void,
     _redeemer: Void,
@@ -165,7 +180,7 @@ validator(encoinsSymb: PolicyId) {
     let rdmrs =
       info.redeemers
     let purp =
-      Mint(encoinsSymb)
+      Mint(encoinsSymb.policyId)
 
     has_key(rdmrs, purp)
   }
