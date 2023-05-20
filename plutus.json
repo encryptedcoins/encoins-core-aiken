@@ -1,0 +1,281 @@
+{
+  "preamble": {
+    "title": "encryptedcoins/encoins-core-aiken",
+    "description": "Aiken contracts for project 'encryptedcoins/encoins-core-aiken'",
+    "version": "0.0.0",
+    "plutusVersion": "v2",
+    "license": "Apache-2.0"
+  },
+  "validators": [
+    {
+      "title": "encoins.encoinsPolicyCheck",
+      "redeemer": {
+        "title": "red",
+        "schema": {
+          "$ref": "#/definitions/Tuple$Tuple$aiken~1transaction~1credential~1Address_aiken~1transaction~1credential~1Address_Tuple$Int_List$Tuple$ByteArray_encoins_core_aiken~1minting_polarity~1MintingPolarity_ByteArray_ByteArray"
+        }
+      },
+      "parameters": [
+        {
+          "title": "par",
+          "schema": {
+            "$ref": "#/definitions/Tuple$aiken~1transaction~1value~1Value_ByteArray"
+          }
+        }
+      ],
+      "compiledCode": "5910cf01000032323232323232323232323223222323232323232323232323232323232323232323232323232323232323232323232323232323232323232533303332323232323232323232323232323232323232323232323232323232323232323232323232323232533305b533305b533305b533305b533305b533305b015101414a02024294040405280a99982d8048a51100814a020062940400452819814000919b870014830236dc04cc0ccc0c8cc0b8ccc8c0040048894ccc18000852f5c026464660c66ea0c00c008ccc01401400400cc19000cdd5983100100499191191919819000a400064a6660bc66e1d200200114c0103d87a8000132323300600148900375660ca00260b800460b80026605a002911003001001222533306000214c103d87a800013232323253330603371e00a002266e95200033065375000497ae01333007007003005375c60c20066eb4c184008c19000cc18800888cc0ac0040092f5c0a6660b06604c002466e1c005200c13371200490060a503303130300024bd7019815299982d0008a60103d87a800013374a90001982d982e000a5eb8120003302a33323001001222533305c00214bd70099191982f9ba830030023330050050010033060003375860bc00400264600200244a6660b60022900009919b8048008cc00c00c004c178004094ccc8c0040048894ccc16c00852f5c026464660bc6e9cc00c008ccc01401400400cc17c00cdd5982e80100202019baf374c0046e98cc0b8014cc0b804804ccdd79ba6001374c6605a00802466606c00205897adef6c6033037001237566609a609e00290011981c1bac3304b304d01c4801094ccc140cdd7998261827000a4000028266ebccc130c13800520043374a90021982a9ba776297ae014a066606600205297adef6c60330340012375666094609800290011981a802119baf33049304b00148000044cc0f800494ccc130cdd7998241825000a40000202606e6604e6eaccc120c12800520023323232322330040012233004001223370290000009800800911299982a8010a5eb7bdb1804c8c8c8c8cc168cdd81ba900137506600a00200466600e00e00600a6eb8c15800cdd6982b001182c801982b801180080091129998298010a5eb7bdb1804c8c8c8c8cc160cdd81ba9001374c6600a00200466600e00e00600a6eb8c15000cdd5982a001182b801982a80100c0a503303137586608c609002e90011198239824800a4004660780024a66609466ebccc118c120005200000d130353302537566608c609000290010050a503302f375866088608c02a90001198229823800a4004666e540492210000c3375e6e98008dd30009999191119801801000980080091129998260010a5eb7bdb1804c8c8c8c8cccc104ccc01c01c00c014004008014dd718268019bad304d0023050003304e00233323001001222533304c00214bd6f7b63009919198279801801199802802800801982800198270010031191919bb037520046ea14ccc120cdd7800a60103d879800014800852001304a002375c60900020426464a66608c66e1d200200114bd6f7b6300991bab304d0013044002304400133015003001375c6092002608064a66608666e1d200030420011001153304449012a4578706563746564206f6e20696e636f727265637420636f6e7374727563746f722076617269616e742e00163303e304003a48008dd59981e981f80724010664644a66608666e1c005200014bd6f7b6300991999801a5eb7bdb18122010000102033330384bd6f7b6302450000101f300100122222533304900413304a337606ea400cdd300125eb7bdb1804c8c8c8c94ccc124cdd799802803800a60103d879800013304e337606ea401cdd30030040a99982499b8f00700113304e337606ea401cdd300300189982719bb037520026e98008ccccc02402400c01c018014dd718250019bab304a002304d005304b00433704004904044bd1bab3042007375a608000c608000e607c00c6eb8c104004c104004c100008c8c8cdd81820001182000098200009bac303e001303e02e323233760607c004607c002607c0026eb0c0f00b4dd7181c0179bab303602e3302f303102b48000526163001001222533303800214a226464a66606c6006004266600a00a0020062940c0f000cdd6981d00111299981919b8800200114c103d879800015333032337100020042980103d87b800014c103d87a800022330030020013001001222533303400214c0103d87a800013232323253330343371e00a002266e95200033039374c00497ae01333007007003005375c606a0066eacc0d4008c0e000cc0d800888c94ccc0bccdc3a400400220042646eb4c0d8004c0b400cc0b4008c0040048894ccc0c400852f5c02646466600c66600a00a002006004006606a0066eb4c0cc008c00400488894ccc0c000c4cc0c4dd400125eb804c8c94ccc0b8cdd79980180200126103d8798000133033375000800a2660666ea0008cccc01801800401000cc0d0010dd69819001929998160008a6103d87a80001323374a9000198171ba70014bd7018178009119299981499b874800800440084c8dd6181800098138019813801111999804001000911192999815a9998178008a5114a0298103d87a800013374a9000198181ba60014bd70199980380100091119299981719b87001480005300103d87a800013374a9000198199ba80014bd7019b8000200100600322533302633720004002298103d8798000153330263371e0040022980103d87a800014c103d87b8000300100122222533302b0041003132323232333330090090033333300a007001002006005006005375c60580066eb4c0b0008c0bc014c0b4010c0040048888894ccc0a80144cc0accdd81ba9004375000697adef6c60132323232533302a3375e6600a01000298103d879800013302f337606ea4020dd40038048a99981519b8f00800113232533302c3370e9000000899191981999bb037520186ea000401cdd6981980098150010802981500099980300400380109981799bb037520026ea0008cccccc02802800c02001c018014dd718158019bad302b002302e006302c00530010012222253330270041003132323232333330090090033333300a007001002006005006005375c60500066eacc0a0008c0ac014c0a4010c0040048888894ccc0980144cc09ccdd81ba9004374c00697adef6c6013232323253330263375e6600a01000298103d879800013302b337606ea4020dd30038048a99981319b8f0080011323253330283370e9000000899191981799bb037520186e9800401cdd5981780098130010802981300099980300400380109981599bb037520026e98008cccccc02802800c02001c018014dd718138019bab3027002302a00630280053001001222253330220031001132323300400233330060060010040033026004375660480066002002444a66603e004297ae01323233022374c600600466600a00a002006604600660420046002002444a66603a004297ae013232533301b300300213302000233300500500100313330050050010033021003301f002233007300200123232323371290000009bad301f001301f001301e0012333004001222333005002222533301b3370e004900008008998101ba733020375200c660406ea400ccc080dd400125eb800040052f5c060020024444a666034006200226464646466600c002004666601001000600c00a6eb8c06c00cdd6980d801180f002180e00198008009111299980c001880089919191919980300080119998040040018030029bae301900337566032004603800860340066002002444a66602a00429444c8c94ccc04cc00c0084ccc01401400400c528180c8019bac30170023001001222533301300214a026464a666022600600429444ccc01401400400cc05c00cc054008c004004888894ccc04c0104cc050cdd81ba9003375000497adef6c6013232323253330133375e6600a00e00298103d8798000133018337606ea401cdd40030040a99980999b8f007001133018337606ea401cdd400300189980c19bb037520026ea0008ccccc02402400c01c018014dd7180a0019bad301400230170053015004323232323232323253330153018002132323232323232323201133323001001222533302000214984c8ccc010010c09000c008c004c0880080048c8c8c92632533301d3370e90000008a999810980d8010a4c2a6603c92011d4578706563746564206e6f206669656c647320666f7220436f6e73747200161533301d3370e90010008a999810980d8010a4c2a6603c92011d4578706563746564206e6f206669656c647320666f7220436f6e7374720016153301e4912b436f6e73747220696e64657820646964206e6f74206d6174636820616e7920747970652076617269616e740016301b001301e002375c60380026eacc06c030dd6980c80598010021800802119299980b19b87480000044c8c8c8c94ccc078c0840084c8c92632533301c3370e9000000899192999811181280109924c64a66603e66e1d20000011323253330253028002132498c03800454cc089241334c6973742f5475706c652f436f6e73747220636f6e7461696e73206d6f7265206974656d73207468616e20657870656374656400163026001301d0021533301f3370e90010008991919191919299981498160010a4c2a6604c9201334c6973742f5475706c652f436f6e73747220636f6e7461696e73206d6f7265206974656d73207468616e2065787065637465640016375a605400260540046eb4c0a0004c0a0008dd69813000980e8010a9981024812b436f6e73747220696e64657820646964206e6f74206d6174636820616e7920747970652076617269616e740016301d001153301f4901334c6973742f5475706c652f436f6e73747220636f6e7461696e73206d6f7265206974656d73207468616e20657870656374656400163023001301a0031533301c3370e90010008a999810180d0018a4c2a6603a92011d4578706563746564206e6f206669656c647320666f7220436f6e7374720016153301d4912b436f6e73747220696e64657820646964206e6f74206d6174636820616e7920747970652076617269616e740016301a0023007003153301b491334c6973742f5475706c652f436f6e73747220636f6e7461696e73206d6f7265206974656d73207468616e2065787065637465640016301f001301f002301d001301400215330174912b436f6e73747220696e64657820646964206e6f74206d6174636820616e7920747970652076617269616e740016301400123253330153370e900000089919299980d980f0010a4c2a66030921334c6973742f5475706c652f436f6e73747220636f6e7461696e73206d6f7265206974656d73207468616e2065787065637465640016375c603800260260042a66602a66e1d200200113232533301b301e002149854cc0612401334c6973742f5475706c652f436f6e73747220636f6e7461696e73206d6f7265206974656d73207468616e2065787065637465640016375c603800260260042a6602c9212b436f6e73747220696e64657820646964206e6f74206d6174636820616e7920747970652076617269616e74001630130013015008301300715330124901334c6973742f5475706c652f436f6e73747220636f6e7461696e73206d6f7265206974656d73207468616e2065787065637465640016375c602c002602c0046eb8c050004c050008c8c8cdd8180a001180a000980a0009bac301200130120023232337606024004602400260240026eb0c040004dd6001191919bb0300e002300e001300e00137580026600200290001111199980399b8700100300d233330050053370000890011807800801001118031baa001230043754002ae695ce2ab9d5573caae7d5d02ba157441",
+      "hash": "a193885b5c2481a9d99d8cf74d18ecc027c889d9091e296c300e044a"
+    },
+    {
+      "title": "encoins.ledgerValidatorCheck",
+      "datum": {
+        "title": "_datum",
+        "schema": {
+          "$ref": "#/definitions/Void"
+        }
+      },
+      "redeemer": {
+        "title": "_redeemer",
+        "schema": {
+          "$ref": "#/definitions/Void"
+        }
+      },
+      "parameters": [
+        {
+          "title": "encoinsSymb",
+          "schema": {
+            "$ref": "#/definitions/ByteArray"
+          }
+        }
+      ],
+      "compiledCode": "58ba0100003232323232323232323232232222533300a32323233323222330030020013001001222533301300214a0264646464a66602866ebc0140045288999803803801802980a001980a001180b801980a80100100099ba548000cc040dd480325eb80dd5998039804800a40246600c601000290000a4c2c6eb8004cc0040052000222233330073370e0020060184666600a00a66e000112002300e001002002230053754002460066ea80055cd2ab9d5573caae7d5d02ba15745",
+      "hash": "1d6d94ad178ddd9c48f4b2576ae2451e4f61f8db2239a53a11765754"
+    }
+  ],
+  "definitions": {
+    "ByteArray": {
+      "dataType": "bytes"
+    },
+    "Int": {
+      "dataType": "integer"
+    },
+    "List$Tuple$ByteArray_encoins_core_aiken/minting_polarity/MintingPolarity": {
+      "dataType": "map",
+      "keys": {
+        "$ref": "#/definitions/ByteArray"
+      },
+      "values": {
+        "$ref": "#/definitions/encoins_core_aiken~1minting_polarity~1MintingPolarity"
+      }
+    },
+    "Option$aiken/transaction/credential/Referenced$aiken/transaction/credential/Credential": {
+      "title": "Optional",
+      "anyOf": [
+        {
+          "title": "Some",
+          "description": "An optional value.",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": [
+            {
+              "$ref": "#/definitions/aiken~1transaction~1credential~1Referenced$aiken~1transaction~1credential~1Credential"
+            }
+          ]
+        },
+        {
+          "title": "None",
+          "description": "Nothing.",
+          "dataType": "constructor",
+          "index": 1,
+          "fields": []
+        }
+      ]
+    },
+    "Tuple$Int_List$Tuple$ByteArray_encoins_core_aiken/minting_polarity/MintingPolarity": {
+      "title": "Tuple",
+      "dataType": "list",
+      "items": [
+        {
+          "$ref": "#/definitions/Int"
+        },
+        {
+          "$ref": "#/definitions/List$Tuple$ByteArray_encoins_core_aiken~1minting_polarity~1MintingPolarity"
+        }
+      ]
+    },
+    "Tuple$Tuple$aiken/transaction/credential/Address_aiken/transaction/credential/Address_Tuple$Int_List$Tuple$ByteArray_encoins_core_aiken/minting_polarity/MintingPolarity_ByteArray_ByteArray": {
+      "title": "Tuple",
+      "dataType": "list",
+      "items": [
+        {
+          "$ref": "#/definitions/Tuple$aiken~1transaction~1credential~1Address_aiken~1transaction~1credential~1Address"
+        },
+        {
+          "$ref": "#/definitions/Tuple$Int_List$Tuple$ByteArray_encoins_core_aiken~1minting_polarity~1MintingPolarity"
+        },
+        {
+          "$ref": "#/definitions/ByteArray"
+        },
+        {
+          "$ref": "#/definitions/ByteArray"
+        }
+      ]
+    },
+    "Tuple$aiken/transaction/credential/Address_aiken/transaction/credential/Address": {
+      "title": "Tuple",
+      "dataType": "list",
+      "items": [
+        {
+          "$ref": "#/definitions/aiken~1transaction~1credential~1Address"
+        },
+        {
+          "$ref": "#/definitions/aiken~1transaction~1credential~1Address"
+        }
+      ]
+    },
+    "Tuple$aiken/transaction/value/Value_ByteArray": {
+      "title": "Tuple",
+      "dataType": "list",
+      "items": [
+        {
+          "$ref": "#/definitions/aiken~1transaction~1value~1Value"
+        },
+        {
+          "$ref": "#/definitions/ByteArray"
+        }
+      ]
+    },
+    "Void": {
+      "title": "Unit",
+      "description": "The nullary constructor.",
+      "anyOf": [
+        {
+          "dataType": "constructor",
+          "index": 0,
+          "fields": []
+        }
+      ]
+    },
+    "aiken/dict/Dict$ByteArray_Int": {
+      "title": "Dict",
+      "description": "An opaque `Dict`. The type is opaque because the module maintains some\n invariant, namely: there's only one occurrence of a given key in the dictionary.\n\n Note that the `key` parameter is a phantom-type, and only present as a\n means of documentation. Keys can be any type, yet will need to comparable\n to use functions like `insert`.\n\n See for example:\n\n ```aiken\n pub type Value =\n   Dict<PolicyId, Dict<AssetName, Int>>\n ```",
+      "dataType": "map",
+      "keys": {
+        "$ref": "#/definitions/ByteArray"
+      },
+      "values": {
+        "$ref": "#/definitions/Int"
+      }
+    },
+    "aiken/transaction/credential/Address": {
+      "title": "Address",
+      "description": "A Cardano `Address` typically holding one or two credential references.\n\n Note that legacy bootstrap addresses (a.k.a. 'Byron addresses') are\n completely excluded from Plutus contexts. Thus, from an on-chain\n perspective only exists addresses of type 00, 01, ..., 07 as detailed\n in [CIP-0019 :: Shelley Addresses](https://github.com/cardano-foundation/CIPs/tree/master/CIP-0019/#shelley-addresses).",
+      "anyOf": [
+        {
+          "title": "Address",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": [
+            {
+              "title": "payment_credential",
+              "$ref": "#/definitions/aiken~1transaction~1credential~1Credential"
+            },
+            {
+              "title": "stake_credential",
+              "$ref": "#/definitions/Option$aiken~1transaction~1credential~1Referenced$aiken~1transaction~1credential~1Credential"
+            }
+          ]
+        }
+      ]
+    },
+    "aiken/transaction/credential/Credential": {
+      "title": "Credential",
+      "description": "A general structure for representing an on-chain `Credential`.\n\n Credentials are always one of two kinds: a direct public/private key\n pair, or a script (native or Plutus).",
+      "anyOf": [
+        {
+          "title": "VerificationKeyCredential",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": [
+            {
+              "$ref": "#/definitions/ByteArray"
+            }
+          ]
+        },
+        {
+          "title": "ScriptCredential",
+          "dataType": "constructor",
+          "index": 1,
+          "fields": [
+            {
+              "$ref": "#/definitions/ByteArray"
+            }
+          ]
+        }
+      ]
+    },
+    "aiken/transaction/credential/Referenced$aiken/transaction/credential/Credential": {
+      "title": "Referenced",
+      "description": "Represent a type of object that can be represented either inline (by hash)\n or via a reference (i.e. a pointer to an on-chain location).\n\n This is mainly use for capturing pointers to a stake credential\n registration certificate in the case of so-called pointer addresses.",
+      "anyOf": [
+        {
+          "title": "Inline",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": [
+            {
+              "$ref": "#/definitions/aiken~1transaction~1credential~1Credential"
+            }
+          ]
+        },
+        {
+          "title": "Pointer",
+          "dataType": "constructor",
+          "index": 1,
+          "fields": [
+            {
+              "title": "slot_number",
+              "$ref": "#/definitions/Int"
+            },
+            {
+              "title": "transaction_index",
+              "$ref": "#/definitions/Int"
+            },
+            {
+              "title": "certificate_index",
+              "$ref": "#/definitions/Int"
+            }
+          ]
+        }
+      ]
+    },
+    "aiken/transaction/value/Value": {
+      "title": "Value",
+      "description": "A multi-asset output `Value`. Contains tokens indexed by [PolicyId](#PolicyId) and [AssetName](#AssetName).\n\n This type maintain some invariants by construction; in particular, a `Value` will never contain a\n zero quantity of a particular token.",
+      "dataType": "map",
+      "keys": {
+        "$ref": "#/definitions/ByteArray"
+      },
+      "values": {
+        "$ref": "#/definitions/aiken~1dict~1Dict$ByteArray_Int"
+      }
+    },
+    "encoins_core_aiken/minting_polarity/MintingPolarity": {
+      "title": "MintingPolarity",
+      "anyOf": [
+        {
+          "title": "MintCoin",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": []
+        },
+        {
+          "title": "BurnCoin",
+          "dataType": "constructor",
+          "index": 1,
+          "fields": []
+        }
+      ]
+    }
+  }
+}

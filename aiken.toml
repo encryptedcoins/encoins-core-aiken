@@ -1,0 +1,14 @@
+name = "encryptedcoins/encoins-core-aiken"
+version = "0.0.0"
+license = "Apache-2.0"
+description = "Aiken contracts for project 'encryptedcoins/encoins-core-aiken'"
+
+[repository]
+user = "encryptedcoins"
+project = "encoins-core-aiken"
+platform = "github"
+
+[[dependencies]]
+name = "aiken-lang/stdlib"
+version = "main"
+source = "github"
