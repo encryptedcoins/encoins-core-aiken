@@ -11,8 +11,8 @@ use aiken/option.{or_else}
 use aiken/transaction.{InlineDatum, Mint, ScriptContext}
 use aiken/transaction/credential.{Address}
 use aiken/transaction/value.{
-  PolicyId, Value, add, flatten, from_asset, from_lovelace, lovelace_of, negate,
-  policies, tokens, without_lovelace, zero,
+  Value, add, flatten, from_lovelace, lovelace_of, negate, policies, tokens,
+  without_lovelace, zero,
 }
 use encoins_core_aiken/minting_polarity.{
   MintingPolarity, inputToEncoinsWithPolarity,
@@ -46,21 +46,11 @@ fn hashRedeemer(red: EncoinsRedeemerOnChain) -> ByteArray {
   sha2_256(serialise_data(red))
 }
 
-// validator(par: EncoinsPolicyParams) {
-validator {
+validator(par: EncoinsPolicyParams) {
   fn encoinsPolicyCheck(
     red: EncoinsRedeemerOnChain,
     context: ScriptContext,
   ) -> Bool {
-    let par =
-      (
-        from_asset(
-          #"94086756809a71cf24ec9b0b5e45e4d5ded209d7016c710834cd0f9e",
-          #"",
-          1,
-        ),
-        #"ba1f8132201504c494c52ce3cc9365419d3446bd5a4dcde19396aac68070977d",
-      )
     // Destructuring arguments 
     let info =
       context.transaction
@@ -175,9 +165,9 @@ validator {
   }
 }
 
-type EncoinsLedgerValidatorParams {
-  policyId: PolicyId,
-}
+// type EncoinsLedgerValidatorParams {
+//   policyId: PolicyId,
+// }
 
 // validator(encoinsSymb: EncoinsLedgerValidatorParams) {
 validator {
@@ -186,16 +176,14 @@ validator {
     _redeemer: Void,
     context: ScriptContext,
   ) -> Bool {
-    let encoinsSymb =
-      EncoinsLedgerValidatorParams(
-        #"a2652dcf44bb2125328e881986247b72621eb85231cd7a64a06ac3d9",
-      )
+    let policyId =
+      #"5727f665615cb3100912a329b8090cb284251def51dd6e12bf36c592"
     let info =
       context.transaction
     let rdmrs =
       info.redeemers
     let purp =
-      Mint(encoinsSymb.policyId)
+      Mint(policyId)
     has_key(rdmrs, purp)
   }
 }
