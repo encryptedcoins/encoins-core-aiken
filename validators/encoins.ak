@@ -177,7 +177,7 @@ validator {
     context: ScriptContext,
   ) -> Bool {
     let policyId =
-      #"c7440274459297109ae2caddd6f8a730337bf328fba5dfe085bf32a8"
+      #"fdf247ce6920c585859cc20b69f90bed8a398da527906e53944e3d71"
     let info =
       context.transaction
     let rdmrs =
