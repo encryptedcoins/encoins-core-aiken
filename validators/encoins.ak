@@ -1,37 +1,34 @@
-use aiken/builtin.{serialise_data, verify_ed25519_signature}
+use aiken/builtin.{
+  add_integer, serialise_data, sha2_256, snd_pair, tail_list,
+  verify_ed25519_signature,
+}
 use aiken/bytearray
 use aiken/dict.{from_list, has_key}
-use aiken/hash.{sha2_256}
-use aiken/int
-use aiken/list.{
-  all, any, difference, filter, foldr, head, length, map, sort, tail,
-}
+use aiken/list.{any, filter, foldr, length, map}
 use aiken/math.{abs}
-use aiken/option.{or_else}
 use aiken/transaction.{InlineDatum, Mint, ScriptContext}
 use aiken/transaction/credential.{Address}
 use aiken/transaction/value.{
-  Value, add, flatten, from_lovelace, lovelace_of, negate, policies, tokens,
-  without_lovelace, zero,
-}
-use encoins_core_aiken/minting_polarity.{
-  MintingPolarity, inputToEncoinsWithPolarity,
+  PolicyId, Value, add, flatten, from_lovelace, negate, policies, tokens, zero,
 }
 use encoins_core_aiken/value_extra.{isNonnegativeValue}
 
 const minAdaTxOutInLedger =
   2000000
 
+const depositMultiplier =
+  2
+
 // Beacon token and verifierPKH
 type EncoinsPolicyParams =
   (Value, ByteArray)
 
-// Ledger address, change addresses, total fees
+// Ledger address, change address, total fees
 type TxParams =
   (Address, Address, Int)
 
-type EncoinsInput =
-  (Int, List<(ByteArray, MintingPolarity)>)
+type EncoinsInputOnChain =
+  (Int, List<(ByteArray, Int)>)
 
 type ProofHash =
   ByteArray
@@ -40,10 +37,30 @@ type ProofSignature =
   ByteArray
 
 type EncoinsRedeemerOnChain =
-  (TxParams, EncoinsInput, ProofHash, ProofSignature)
+  (TxParams, EncoinsInputOnChain, ProofHash, ProofSignature)
 
 fn hashRedeemer(red: EncoinsRedeemerOnChain) -> ByteArray {
-  sha2_256(serialise_data(red))
+  let (params, input, proofHash, _) =
+    red
+  sha2_256(serialise_data((params, input, proofHash)))
+}
+
+fn checkLedgerOuputValue1(vals: List<Value>) {
+  when vals is {
+    [] ->
+      True
+    [x, ..] ->
+      length(flatten(x)) <= 2 && checkLedgerOuputValue2(tail_list(vals))
+  }
+}
+
+fn checkLedgerOuputValue2(vals: List<Value>) {
+  when vals is {
+    [] ->
+      True
+    [x, ..] ->
+      length(flatten(x)) == 2 && checkLedgerOuputValue2(tail_list(vals))
+  }
 }
 
 validator(par: EncoinsPolicyParams) {
@@ -51,9 +68,13 @@ validator(par: EncoinsPolicyParams) {
     red: EncoinsRedeemerOnChain,
     context: ScriptContext,
   ) -> Bool {
-    // Destructuring arguments 
+    // Destructuring arguments
     let info =
       context.transaction
+    let vMint =
+      info.mint
+    expect Mint(encoinsSymb) =
+      context.purpose
     let (beacon, verifierPKH) =
       par
     let ((ledgerAddr, changeAddr, feesWithSign), (v, inputs), _, sig) =
@@ -64,39 +85,29 @@ validator(par: EncoinsPolicyParams) {
       from_lovelace(v * 1000000)
     let valFees =
       from_lovelace(fees * 1000000)
-    let vMint =
-      info.mint
-    expect Mint(encoinsSymb) =
-      context.purpose
+    let deposits =
+      depositMultiplier * foldr(map(inputs, snd_pair), add_integer, 0)
+    let valDeposits =
+      from_lovelace(deposits * 1000000)
+    let minTxOutValueInLedger =
+      from_lovelace(minAdaTxOutInLedger)
 
     // Defining conditions
     // Condition 0
     let actual =
       tokens(vMint, encoinsSymb)
     let expected =
-      from_list(map(inputs, inputToEncoinsWithPolarity), bytearray.compare)
+      from_list(inputs, bytearray.compare)
     let cond0 =
       actual == expected && policies(vMint) == [encoinsSymb]
 
     // Condition 1
     let cond1 =
       verify_ed25519_signature(verifierPKH, hashRedeemer(red), sig)
-
     // Condition 2
-    let cond2 =
-      v + fees >= 0 || any(
-        info.outputs,
-        fn(o) {
-          o.address == changeAddr && isNonnegativeValue(
-            add(o.value, add(val, valFees)),
-          )
-        },
-      )
-
-    // Condition 3
     let refIns =
       map(info.reference_inputs, fn(x) { x.output })
-    let cond3 =
+    let cond2 =
       any(
         refIns,
         fn(o) {
@@ -106,11 +117,18 @@ validator(par: EncoinsPolicyParams) {
         },
       )
 
-    // Conditions 4 and 5
+    // Conditions 3 and 4
     let ins =
       map(info.inputs, fn(x) { x.output })
     let ledgerSpentOuts =
-      filter(ins, fn(x) { x.address == ledgerAddr })
+      filter(
+        ins,
+        fn(x) {
+          x.address == ledgerAddr && isNonnegativeValue(
+            add(x.value, negate(minTxOutValueInLedger)),
+          )
+        },
+      )
     // vOuts are the values flowing out of the Ledger address
     let vOuts =
       map(ledgerSpentOuts, fn(x) { x.value })
@@ -120,7 +138,11 @@ validator(par: EncoinsPolicyParams) {
     let ledgerProducedOuts =
       filter(
         info.outputs,
-        fn(x) { x.address == ledgerAddr && x.datum == InlineDatum(Void) },
+        fn(x) {
+          x.address == ledgerAddr && isNonnegativeValue(
+            add(x.value, negate(minTxOutValueInLedger)),
+          ) && x.datum == InlineDatum(Void)
+        },
       )
     // vIns are the values flowing into the Ledger address
     let vIns =
@@ -129,55 +151,52 @@ validator(par: EncoinsPolicyParams) {
       foldr(vIns, add, zero())
 
     // Wallet Mode
-    let cond4 =
+    let cond3 =
       vIn == add(vOut, val)
 
     // Ledger Mode
+    let cond4 =
+      vIn == add(vOut, add(vMint, add(val, valDeposits)))
+
     let cond5 =
-      vIn == add(vOut, add(vMint, val))
+      checkLedgerOuputValue1(vIns)
 
     // Condition 6
-    let vInsFlat =
-      map(vIns, flatten)
-    // Sorting in the ascending order of the number of tokens in the Ledger outputs
-    let txOutSize =
-      sort(map(vInsFlat, length), int.compare)
-    let txOutSizeHead =
-      or_else(head(txOutSize), 0)
-    let txOutSizeTail =
-      or_else(tail(txOutSize), [])
+    let depositsOrZero =
+      if cond5 {
+        deposits
+      } else {
+        0
+      }
+    let valDepositsOrZero =
+      from_lovelace(depositsOrZero * 1000000)
     let cond6 =
-      all(txOutSizeTail, fn(x) { x == 6 }) && txOutSizeHead <= 6
-
-    // Condition 7
-    // Sorting in the descending order of lovelace in the Ledger outputs
-    let adaVals =
-      or_else(tail(sort(map(vIns, lovelace_of), flip(int.compare))), [])
-    let cond7 =
-      all(adaVals, fn(x) { x == minAdaTxOutInLedger })
-
-    // Condition 8
-    let cond8 =
-      difference(policies(without_lovelace(vIn)), [encoinsSymb]) == []
+      v + fees + depositsOrZero >= 0 || any(
+        info.outputs,
+        fn(o) {
+          o.address == changeAddr && isNonnegativeValue(
+            add(o.value, add(val, add(valFees, valDepositsOrZero))),
+          )
+        },
+      )
 
     // Imposing validation conditions
-    cond0 && cond1 && cond2 && cond3 && ( cond4 || cond5 ) && cond6 && cond7 && cond8
+    cond0 && cond1 && cond2 && cond3 && ( cond4 || cond5 ) && cond6
   }
 }
 
-// type EncoinsLedgerValidatorParams {
-//   policyId: PolicyId,
-// }
+type EncoinsLedgerValidatorParams {
+  policyId: PolicyId,
+}
 
-// validator(encoinsSymb: EncoinsLedgerValidatorParams) {
-validator {
+validator(encoinsSymb: EncoinsLedgerValidatorParams) {
   fn ledgerValidatorCheck(
     _datum: Void,
     _redeemer: Void,
     context: ScriptContext,
   ) -> Bool {
     let policyId =
-      #"fdf247ce6920c585859cc20b69f90bed8a398da527906e53944e3d71"
+      encoinsSymb.policyId
     let info =
       context.transaction
     let rdmrs =
@@ -185,5 +204,15 @@ validator {
     let purp =
       Mint(policyId)
     has_key(rdmrs, purp)
+  }
+}
+
+validator(par: Int) {
+  fn scriptLoadTest(
+    _datum: Void,
+    redeemer: Int,
+    _context: ScriptContext,
+  ) -> Bool {
+    redeemer == par
   }
 }
