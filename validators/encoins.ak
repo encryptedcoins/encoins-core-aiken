@@ -9,7 +9,8 @@ use aiken/math.{abs}
 use aiken/transaction.{InlineDatum, Mint, ScriptContext}
 use aiken/transaction/credential.{Address}
 use aiken/transaction/value.{
-  PolicyId, Value, flatten, from_lovelace, negate, policies, tokens, zero, from_minted_value, merge
+  PolicyId, Value, ada_policy_id, ada_asset_name, add, flatten, from_lovelace, 
+  from_minted_value, lovelace_of, merge, negate, policies, tokens, zero,
 }
 use encoins_core_aiken/value_extra.{isNonnegativeValue}
 
@@ -125,7 +126,7 @@ validator(par: EncoinsPolicyParams) {
         ins,
         fn(x) {
           x.address == ledgerAddr && isNonnegativeValue(
-            merge(x.value, negate(minTxOutValueInLedger)),
+            add(x.value, ada_policy_id, ada_asset_name, -(lovelace_of(minTxOutValueInLedger))),
           )
         },
       )
