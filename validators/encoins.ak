@@ -9,7 +9,7 @@ use aiken/math.{abs}
 use aiken/transaction.{InlineDatum, Mint, ScriptContext}
 use aiken/transaction/credential.{Address}
 use aiken/transaction/value.{
-  PolicyId, Value, add, flatten, from_lovelace, negate, policies, tokens, zero,
+  PolicyId, Value, flatten, from_lovelace, negate, policies, tokens, zero, from_minted_value, merge
 }
 use encoins_core_aiken/value_extra.{isNonnegativeValue}
 
@@ -72,7 +72,7 @@ validator(par: EncoinsPolicyParams) {
     let info =
       context.transaction
     let vMint =
-      info.mint
+      from_minted_value(info.mint)
     expect Mint(encoinsSymb) =
       context.purpose
     let (beacon, verifierPKH) =
@@ -86,7 +86,7 @@ validator(par: EncoinsPolicyParams) {
     let valFees =
       from_lovelace(fees * 1000000)
     let deposits =
-      depositMultiplier * foldr(map(inputs, snd_pair), add_integer, 0)
+      depositMultiplier * foldr(map(inputs, snd_pair), 0, add_integer)
     let valDeposits =
       from_lovelace(deposits * 1000000)
     let minTxOutValueInLedger =
@@ -112,7 +112,7 @@ validator(par: EncoinsPolicyParams) {
         refIns,
         fn(o) {
           o.address == ledgerAddr && isNonnegativeValue(
-            add(o.value, negate(beacon)),
+            merge(o.value, negate(beacon)),
           )
         },
       )
@@ -125,7 +125,7 @@ validator(par: EncoinsPolicyParams) {
         ins,
         fn(x) {
           x.address == ledgerAddr && isNonnegativeValue(
-            add(x.value, negate(minTxOutValueInLedger)),
+            merge(x.value, negate(minTxOutValueInLedger)),
           )
         },
       )
@@ -133,14 +133,14 @@ validator(par: EncoinsPolicyParams) {
     let vOuts =
       map(ledgerSpentOuts, fn(x) { x.value })
     let vOut =
-      foldr(vOuts, add, zero())
+      foldr(vOuts, zero(), merge)
 
     let ledgerProducedOuts =
       filter(
         info.outputs,
         fn(x) {
           x.address == ledgerAddr && isNonnegativeValue(
-            add(x.value, negate(minTxOutValueInLedger)),
+            merge(x.value, negate(minTxOutValueInLedger)),
           ) && x.datum == InlineDatum(Void)
         },
       )
@@ -148,15 +148,15 @@ validator(par: EncoinsPolicyParams) {
     let vIns =
       map(ledgerProducedOuts, fn(x) { x.value })
     let vIn =
-      foldr(vIns, add, zero())
+      foldr(vIns, zero(), merge)
 
     // Wallet Mode
     let cond3 =
-      vIn == add(vOut, val)
+      vIn == merge(vOut, val)
 
     // Ledger Mode
     let cond4 =
-      vIn == add(vOut, add(vMint, add(val, valDeposits)))
+      vIn == merge(vOut, merge(vMint, merge(val, valDeposits)))
 
     let cond5 =
       checkLedgerOuputValue1(vIns)
@@ -175,7 +175,7 @@ validator(par: EncoinsPolicyParams) {
         info.outputs,
         fn(o) {
           o.address == changeAddr && isNonnegativeValue(
-            add(o.value, add(val, add(valFees, valDepositsOrZero))),
+            merge(o.value, merge(val, merge(valFees, valDepositsOrZero))),
           )
         },
       )
