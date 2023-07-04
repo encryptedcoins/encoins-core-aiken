@@ -178,20 +178,24 @@ validator(par: EncoinsPolicyParams) {
 
     // Wallet Mode
     let cond3 =
-      vIn == merge(vOut, val)
-    let cond3msgs = fromCondMsgs(
-        [ @"cond3:"
-        , @"vIn", cbor.diagnostic(vIn)
-        , @"vOutWithVal", cbor.diagnostic(merge(vOut, val))
-        ])
+        vIn == merge(vOut, val)
 
     // Ledger Mode
     let cond4 =
       vIn == merge(vOut, merge(vMint, merge(val, valDeposits)))
-    let cond4msgs = fromCondMsgs(
-        [ @"cond4:"
-        , @"vIn = ", cbor.diagnostic(vIn)
+    
+    let cond3or4msgs = fromCondMsgs(
+        [ @"cond3:"
+        , @"vIn", cbor.diagnostic(vIn)
+        , @"vOutWithVal", cbor.diagnostic(merge(vOut, val))
+        , @"cond4:"
+        , @"valDeposits", cbor.diagnostic(valDeposits)
         , @"merge(vOut, merge(vMint, merge(val, valDeposits))) = ", cbor.diagnostic(merge(vMint, merge(val, valDeposits)))
+        ])
+
+    let cond5msgs = fromCondMsgs(
+        [ @"cond5:"
+        , @"vIns", cbor.diagnostic(map(vIns, fn(x) {length(flatten(x))}))
         ])
 
     let cond5 =
@@ -199,13 +203,24 @@ validator(par: EncoinsPolicyParams) {
 
     // Condition 6
     let depositsOrZero =
-      if cond5 {
+      if cond4 {
         deposits
       } else {
         0
       }
     let valDepositsOrZero =
       from_lovelace(depositsOrZero * 1000000)
+
+    let cond6msgs = fromCondMsgs(
+        [ @"cond6:"
+        , @"v + fees + depositsOrZero:", cbor.diagnostic(v + fees + depositsOrZero)
+        , @"merge(o.value, merge(val, merge(valFees, valDepositsOrZero)))", cbor.diagnostic(filter(info.outputs, fn(o) {o.address == changeAddr}))
+        , @"val=", cbor.diagnostic(val)
+        , @"valFees=", cbor.diagnostic(valFees)
+        , @"valDepositsOrZero=", cbor.diagnostic(valDepositsOrZero)
+        , @"deposits", cbor.diagnostic(deposits)
+        ])
+
     let cond6 =
       v + fees + depositsOrZero >= 0 || any(
         info.outputs,
@@ -221,9 +236,9 @@ validator(par: EncoinsPolicyParams) {
     traceOnFalse(cond0msgs, cond0) 
         && traceOnFalse(@"cond1:", cond1) 
         && traceOnFalse(cond2msgs, cond2) 
-        && traceOnFalse(cond3msgs, cond3) 
-        && traceOnFalse(cond4msgs, cond4 || cond5) 
-        && traceOnFalse(@"cond6:", cond6) 
+        && traceOnFalse(cond3or4msgs, cond3 || cond4) 
+        && traceOnFalse(cond5msgs, cond5) 
+        && traceOnFalse(cond6msgs, cond6) 
   }
 }
 
@@ -304,7 +319,7 @@ validator(par: EncoinsPolicyParams) {
         info.outputs,
         fn(x) {
           x.address == ledgerAddr && isNonnegativeValue(
-            merge(x.value, negate(minTxOutValueInLedger)),
+            add(x.value, ada_policy_id, ada_asset_name, -(lovelace_of(minTxOutValueInLedger))),
           ) && x.datum == InlineDatum(Void)
         },
       )
@@ -327,7 +342,7 @@ validator(par: EncoinsPolicyParams) {
 
     // Condition 6
     let depositsOrZero =
-      if cond5 {
+      if cond4 {
         deposits
       } else {
         0
@@ -345,7 +360,7 @@ validator(par: EncoinsPolicyParams) {
       )
 
     // Imposing validation conditions
-    cond0 && cond1 && cond2 && cond3 && ( cond4 || cond5 ) && cond6
+    cond0 && cond1 && cond2 && ( cond3 || cond4 ) && cond5 && cond6
   }
 }
 
