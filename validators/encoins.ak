@@ -3,15 +3,15 @@ use aiken/builtin.{
   verify_ed25519_signature,
 }
 use aiken/bytearray
-use aiken/cbor.{}
+use aiken/cbor
 use aiken/dict.{from_list, has_key}
 use aiken/list.{any, filter, foldr, length, map}
 use aiken/math.{abs}
-use aiken/string.{}
+use aiken/string
 use aiken/transaction.{InlineDatum, Mint, ScriptContext}
 use aiken/transaction/credential.{Address}
 use aiken/transaction/value.{
-  PolicyId, Value, ada_policy_id, ada_asset_name, add, flatten, from_lovelace, 
+  PolicyId, Value, ada_asset_name, ada_policy_id, add, flatten, from_lovelace,
   from_minted_value, lovelace_of, merge, negate, policies, tokens, zero,
 }
 use encoins_core_aiken/value_extra.{isNonnegativeValue}
@@ -62,18 +62,21 @@ fn checkLedgerOuputValue2(vals: List<Value>) {
     [] ->
       True
     [x, ..] ->
-      length(flatten(x)) == 2 && checkLedgerOuputValue2(tail_list(vals))
+      length(flatten(x)) == 2 && lovelace_of(x) == minAdaTxOutInLedger && checkLedgerOuputValue2(
+        tail_list(vals),
+      )
   }
 }
 
-fn traceOnFalse(msg : String, pred : Bool) -> Bool {
-    when pred is {
-        True -> True
-        False -> {
-            trace msg
-            False
-        } 
+fn traceOnFalse(msg: String, pred: Bool) -> Bool {
+  when pred is {
+    True ->
+      True
+    False -> {
+      trace msg
+      False
     }
+  }
 }
 
 validator(par: EncoinsPolicyParams) {
@@ -104,8 +107,8 @@ validator(par: EncoinsPolicyParams) {
       from_lovelace(deposits * 1000000)
     let minTxOutValueInLedger =
       from_lovelace(minAdaTxOutInLedger)
-    let fromCondMsgs = 
-        fn(msgs) {foldr(msgs, @"", string.concat)}
+    let fromCondMsgs =
+      fn(msgs) { foldr(msgs, @"", string.concat) }
 
     // Defining conditions
     // Condition 0
@@ -115,13 +118,18 @@ validator(par: EncoinsPolicyParams) {
       from_list(inputs, bytearray.compare)
     let cond0 =
       actual == expected && policies(vMint) == [encoinsSymb]
-    
-    let cond0msgs = fromCondMsgs(
-        [ @"cond0:"
-        , @"actual: ", cbor.diagnostic(actual)
-        , @"expected: ", cbor.diagnostic(expected)
-        , @"policies: ", cbor.diagnostic(policies(vMint))
-        ])
+    let cond0msgs =
+      fromCondMsgs(
+        [
+          @"cond0:",
+          @"actual: ",
+          cbor.diagnostic(actual),
+          @"expected: ",
+          cbor.diagnostic(expected),
+          @"policies: ",
+          cbor.diagnostic(policies(vMint)),
+        ],
+      )
 
     // Condition 1
     let cond1 =
@@ -138,10 +146,8 @@ validator(par: EncoinsPolicyParams) {
           )
         },
       )
-    let cond2msgs = fromCondMsgs(
-        [ @"cond2:"
-        , @"refIns:", cbor.diagnostic(refIns)
-        ])
+    let cond2msgs =
+      fromCondMsgs([@"cond2:", @"refIns:", cbor.diagnostic(refIns)])
 
     // Conditions 3 and 4
     let ins =
@@ -151,7 +157,12 @@ validator(par: EncoinsPolicyParams) {
         ins,
         fn(x) {
           x.address == ledgerAddr && isNonnegativeValue(
-            add(x.value, ada_policy_id, ada_asset_name, -(lovelace_of(minTxOutValueInLedger))),
+            add(
+              x.value,
+              ada_policy_id,
+              ada_asset_name,
+              -lovelace_of(minTxOutValueInLedger),
+            ),
           )
         },
       )
@@ -178,25 +189,35 @@ validator(par: EncoinsPolicyParams) {
 
     // Wallet Mode
     let cond3 =
-        vIn == merge(vOut, val)
+      vIn == merge(vOut, val)
 
     // Ledger Mode
     let cond4 =
       vIn == merge(vOut, merge(vMint, merge(val, valDeposits)))
-    
-    let cond3or4msgs = fromCondMsgs(
-        [ @"cond3:"
-        , @"vIn", cbor.diagnostic(vIn)
-        , @"vOutWithVal", cbor.diagnostic(merge(vOut, val))
-        , @"cond4:"
-        , @"valDeposits", cbor.diagnostic(valDeposits)
-        , @"merge(vOut, merge(vMint, merge(val, valDeposits))) = ", cbor.diagnostic(merge(vMint, merge(val, valDeposits)))
-        ])
+    let cond3or4msgs =
+      fromCondMsgs(
+        [
+          @"cond3:",
+          @"vIn",
+          cbor.diagnostic(vIn),
+          @"vOutWithVal",
+          cbor.diagnostic(merge(vOut, val)),
+          @"cond4:",
+          @"valDeposits",
+          cbor.diagnostic(valDeposits),
+          @"merge(vOut, merge(vMint, merge(val, valDeposits))) = ",
+          cbor.diagnostic(merge(vMint, merge(val, valDeposits))),
+        ],
+      )
 
-    let cond5msgs = fromCondMsgs(
-        [ @"cond5:"
-        , @"vIns", cbor.diagnostic(map(vIns, fn(x) {length(flatten(x))}))
-        ])
+    let cond5msgs =
+      fromCondMsgs(
+        [
+          @"cond5:",
+          @"vIns",
+          cbor.diagnostic(map(vIns, fn(x) { length(flatten(x)) })),
+        ],
+      )
 
     let cond5 =
       checkLedgerOuputValue1(vIns)
@@ -211,15 +232,26 @@ validator(par: EncoinsPolicyParams) {
     let valDepositsOrZero =
       from_lovelace(depositsOrZero * 1000000)
 
-    let cond6msgs = fromCondMsgs(
-        [ @"cond6:"
-        , @"v + fees + depositsOrZero:", cbor.diagnostic(v + fees + depositsOrZero)
-        , @"merge(o.value, merge(val, merge(valFees, valDepositsOrZero)))", cbor.diagnostic(filter(info.outputs, fn(o) {o.address == changeAddr}))
-        , @"val=", cbor.diagnostic(val)
-        , @"valFees=", cbor.diagnostic(valFees)
-        , @"valDepositsOrZero=", cbor.diagnostic(valDepositsOrZero)
-        , @"deposits", cbor.diagnostic(deposits)
-        ])
+    let cond6msgs =
+      fromCondMsgs(
+        [
+          @"cond6:",
+          @"v + fees + depositsOrZero:",
+          cbor.diagnostic(v + fees + depositsOrZero),
+          @"merge(o.value, merge(val, merge(valFees, valDepositsOrZero)))",
+          cbor.diagnostic(
+            filter(info.outputs, fn(o) { o.address == changeAddr }),
+          ),
+          @"val=",
+          cbor.diagnostic(val),
+          @"valFees=",
+          cbor.diagnostic(valFees),
+          @"valDepositsOrZero=",
+          cbor.diagnostic(valDepositsOrZero),
+          @"deposits",
+          cbor.diagnostic(deposits),
+        ],
+      )
 
     let cond6 =
       v + fees + depositsOrZero >= 0 || any(
@@ -232,13 +264,13 @@ validator(par: EncoinsPolicyParams) {
       )
 
     // Imposing validation conditions
-    
-    traceOnFalse(cond0msgs, cond0) 
-        && traceOnFalse(@"cond1:", cond1) 
-        && traceOnFalse(cond2msgs, cond2) 
-        && traceOnFalse(cond3or4msgs, cond3 || cond4) 
-        && traceOnFalse(cond5msgs, cond5) 
-        && traceOnFalse(cond6msgs, cond6) 
+    traceOnFalse(cond0msgs, cond0) && traceOnFalse(@"cond1:", cond1) && traceOnFalse(
+      cond2msgs,
+      cond2,
+    ) && traceOnFalse(cond3or4msgs, cond3 || cond4) && traceOnFalse(
+      cond5msgs,
+      cond5,
+    ) && traceOnFalse(cond6msgs, cond6)
   }
 }
 
@@ -304,7 +336,12 @@ validator(par: EncoinsPolicyParams) {
         ins,
         fn(x) {
           x.address == ledgerAddr && isNonnegativeValue(
-            add(x.value, ada_policy_id, ada_asset_name, -(lovelace_of(minTxOutValueInLedger))),
+            add(
+              x.value,
+              ada_policy_id,
+              ada_asset_name,
+              -lovelace_of(minTxOutValueInLedger),
+            ),
           )
         },
       )
@@ -319,7 +356,12 @@ validator(par: EncoinsPolicyParams) {
         info.outputs,
         fn(x) {
           x.address == ledgerAddr && isNonnegativeValue(
-            add(x.value, ada_policy_id, ada_asset_name, -(lovelace_of(minTxOutValueInLedger))),
+            add(
+              x.value,
+              ada_policy_id,
+              ada_asset_name,
+              -lovelace_of(minTxOutValueInLedger),
+            ),
           ) && x.datum == InlineDatum(Void)
         },
       )
