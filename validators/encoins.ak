@@ -157,7 +157,7 @@ validator(par: EncoinsPolicyParams) {
 
     // Condition 7
     let cond7 =
-      length(filter(vOuts, fn(x) { lovelace_of(x) >= minMaxAdaTxOutInLedger })) > 0
+      length(filter(vIns, fn(x) { lovelace_of(x) >= minMaxAdaTxOutInLedger })) > 0
 
     // Imposing validation conditions
     cond0 && cond1 && cond2 && ( cond3 || cond4 ) && cond5 && cond6 && cond7

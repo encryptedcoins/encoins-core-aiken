@@ -230,7 +230,7 @@ validator(par: EncoinsPolicyParams) {
       )
     // Condition 7
     let cond7 =
-      length(filter(vOuts, fn(x) { lovelace_of(x) >= minMaxAdaTxOutInLedger })) > 0
+      length(filter(vIns, fn(x) { lovelace_of(x) >= minMaxAdaTxOutInLedger })) > 0
 
     // Imposing validation conditions
     traceOnFalse(cond0msgs, cond0) && traceOnFalse(@"cond1:", cond1) && traceOnFalse(
