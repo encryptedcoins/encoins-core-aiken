@@ -150,8 +150,18 @@ validator(par: EncoinsPolicyParams) {
         },
       )
 
+    // Condition 7
+    let cond7 =
+      list.all(
+        value.flatten(vMint),
+        fn(asset) {
+          let (_, _, quantity) = asset
+          abs(quantity) == 1
+        },
+      )
+
     // Imposing validation conditions
-    cond0 && cond1 && cond2 && ( cond3 || cond4 ) && cond5 && cond6
+    cond0 && cond1 && cond2 && ( cond3 || cond4 ) && cond5 && cond6 && cond7
   }
 }
 
